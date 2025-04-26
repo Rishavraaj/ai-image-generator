@@ -2,23 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-
-// Server Action
-async function generateImageAction(formData: FormData) {
-  "use server";
-
-  const message = formData.get("prompt");
-  const response = await fetch(`${process.env.BACKEND_URL}/message`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ message }),
-  });
-
-  const imageData = await response.text();
-  return imageData;
-}
+import { generateImageAction } from "./actions";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -29,9 +13,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.set("prompt", prompt);
-      const imageData = await generateImageAction(formData);
+      const imageData = await generateImageAction(prompt);
       setImage(imageData);
     } catch (error) {
       console.error("Error generating image:", error);
