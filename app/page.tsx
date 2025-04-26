@@ -15,6 +15,7 @@ export default function Home() {
     try {
       const imageData = await generateImageAction(prompt);
       setImage(imageData);
+      setPrompt("");
     } catch (error) {
       console.error("Error generating image:", error);
     } finally {
