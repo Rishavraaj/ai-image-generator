@@ -3,24 +3,35 @@
 import Image from "next/image";
 import { useState } from "react";
 
+// Server Action
+async function generateImageAction(formData: FormData) {
+  "use server";
+
+  const message = formData.get("prompt");
+  const response = await fetch(`${process.env.BACKEND_URL}/message`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  const imageData = await response.text();
+  return imageData;
+}
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const generateImage = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8787/message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: prompt }),
-      });
-
-      const imageData = await response.text();
+      const formData = new FormData();
+      formData.set("prompt", prompt);
+      const imageData = await generateImageAction(formData);
       setImage(imageData);
     } catch (error) {
       console.error("Error generating image:", error);
@@ -46,7 +57,7 @@ export default function Home() {
         AI Image Generator
       </h1>
 
-      <form onSubmit={generateImage} className="mb-8">
+      <form onSubmit={handleSubmit} className="mb-8">
         <div className="flex gap-4">
           <input
             type="text"
